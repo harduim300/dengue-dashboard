@@ -4,8 +4,8 @@ const Select = dynamic(() => import('react-select'), { ssr: false });
 
   
 
+//   { value: 'BR', label: 'Brasil' },
 const locationList: LocationOption[] = [
-  { value: 'BR', label: 'Brasil' },
   { value: 'AC', label: 'Acre' },
   { value: 'AL', label: 'Alagoas' },
   { value: 'AP', label: 'Amapá' },
