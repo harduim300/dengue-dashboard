@@ -1,6 +1,6 @@
 import { SummaryData, SummaryGraphData } from "@/types/types";
 
-const baseUrl = "http://localhost:5000/dengue_api";
+const baseUrl = "https://dengue-dashboard-backend.vercel.app/dengue_api";
 
 export async function getSummaryData (activeLocation: string)  {
     let res;
