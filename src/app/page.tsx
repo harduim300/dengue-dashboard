@@ -1,16 +1,17 @@
 "use client"
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Card from "@/components/SummaryCards";
-import { Line } from "react-chartjs-2";
 import { Chart } from "chart.js/auto";
+import dynamic from "next/dynamic";
 import {CategoryScale} from 'chart.js'; 
 import LocationSelect from "@/components/LocationSelect";
 import { getSummaryData, getGraphData, getVersion } from "@/services/api";
+const Line = dynamic(() => import("react-chartjs-2").then((mod) => mod.Line), { ssr: false });
 Chart.register(CategoryScale);
 
 export default function Home() {
-  const [activeLocation, setActiveLocation] = useState("BR");
-  const [lastUpdated, setLastUpdated] = useState("");
+  const [activeLocation, setActiveLocation] = useState("RJ");
+  const [lastUpdated, setLastUpdated] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [summaryData, setSummaryData] = useState({
     total_casos: '0',
@@ -71,7 +72,8 @@ export default function Home() {
 
   useEffect(() => {
     async function fetchVersion () {
-      await getVersion().then(setLastUpdated)
+      const version = await getVersion();
+      setLastUpdated(version);
     }
     fetchVersion()
   }, [])
@@ -84,11 +86,15 @@ export default function Home() {
       <div id="dashboard-container" className="m-auto grid grid-rows-gridLayout gap-3 w-container_width h-container_height text-center rounded-md">
         <div id="dashboard-menu" className="flex justify-between py-4 bg-white items-center">
           <LocationSelect activeLocation={activeLocation} setActiveLocation={setActiveLocation} />
-          <span id="update-date" className="mr-4">
-            Última atualização: {lastUpdated}
-            <br/>
-            <span className="text-[8px]">(Este é um site de teste. Consulte fontes oficiais para informações precisas.)</span>
-          </span>
+          {lastUpdated ? (
+            <span id="update-date" className="mr-4">
+              Última atualização: {lastUpdated}
+              <br/>
+              <span className="text-[8px]">(Este é um site de teste. Consulte fontes oficiais para informações precisas.)</span>
+            </span>
+          ) : (
+            <span id="update-date" className="mr-4">Carregando...</span>
+          )}
         </div>
         {isLoading ? 
         (<div className="flex justify-center items-center h-64 flex-col bg-white">

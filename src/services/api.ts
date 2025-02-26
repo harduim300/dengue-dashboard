@@ -1,6 +1,6 @@
 import { SummaryData, SummaryGraphData } from "@/types/types";
 
-const baseUrl = "https://dengue-dashboard-backend.vercel.app/dengue_api";
+const baseUrl = "http://localhost:5000/dengue_api";
 
 export async function getSummaryData (activeLocation: string)  {
     let res;
@@ -10,9 +10,9 @@ export async function getSummaryData (activeLocation: string)  {
     else {
         res = await fetch(`${baseUrl}/uf/${activeLocation}`)
     }
-    let summaryData : SummaryData = await res.json();
+    const summaryData : SummaryData = await res.json();
 
-    let formattedData: SummaryData = {
+    const formattedData: SummaryData = {
         total_casos: Number(summaryData.total_casos).toLocaleString(),
         media_risco: summaryData.media_risco,
         porcentagem_alerta_4: Number(summaryData.porcentagem_alerta_4).toLocaleString()
@@ -30,7 +30,7 @@ export async function getGraphData  (activeLocation: string) {
       res = await fetch(`${baseUrl}/grafico_uf/${activeLocation}`)
     }
 
-    let summaryGraphData : SummaryGraphData = await res.json();
+    const summaryGraphData : SummaryGraphData = await res.json();
     console.log(summaryGraphData)
 
     return {

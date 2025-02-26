@@ -1,4 +1,3 @@
-
 type Props = {
     keyColor: number,
     title: string,
@@ -7,8 +6,8 @@ type Props = {
 
 const Card = (props: Props) => {
 
-    let bgColor;
-    let nivel_alerta;
+    let bgColor = "";
+    let nivel_alerta = "";
 
     switch (props.keyColor) {
         case 1:

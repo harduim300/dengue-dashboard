@@ -1,8 +1,8 @@
-import React, { useMemo, useRef, useEffect } from "react";
-import dynamic from "next/dynamic";
 import { LocationOption } from "@/types/types";
+import dynamic from "next/dynamic";
+const Select = dynamic(() => import('react-select'), { ssr: false });
 
-const Select = dynamic(() => import("react-select"), { ssr: false });
+  
 
 const locationList: LocationOption[] = [
   { value: 'BR', label: 'Brasil' },
@@ -40,25 +40,15 @@ type Props = {
   setActiveLocation: (value: string) => void;
 };
 
-export default function LocationSelect({ activeLocation, setActiveLocation }: Props) {
-  const selectRef = useRef<any>(null);
-
-  useEffect(() => {
-    if (selectRef.current) {
-      selectRef.current.setValue(
-        locationList.find((option) => option.value === activeLocation)
-      );
-    }
-  }, [activeLocation]);
-
-  return useMemo(() => (
+  export default function LocationSelect({ activeLocation, setActiveLocation }: Props) {
+    
+  return (
     <Select
-      ref={selectRef}
       placeholder="Selecione um Estado"
       options={locationList}
       onChange={(option) => setActiveLocation((option as LocationOption).value)}
-      defaultValue={locationList.find((option) => option.value === activeLocation)}
+      value={locationList.find((option) => option.value === activeLocation)}
       className="w-1/3 ml-4"
     />
-  ), []);
+  );
 }
