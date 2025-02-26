@@ -1,101 +1,119 @@
-import Image from "next/image";
+"use client"
+import React, { useState, useEffect, useMemo, useRef } from "react";
+import Card from "@/components/SummaryCards";
+import { Line } from "react-chartjs-2";
+import { Chart } from "chart.js/auto";
+import {CategoryScale} from 'chart.js'; 
+import LocationSelect from "@/components/LocationSelect";
+import { getSummaryData, getGraphData, getVersion } from "@/services/api";
+Chart.register(CategoryScale);
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [activeLocation, setActiveLocation] = useState("BR");
+  const [lastUpdated, setLastUpdated] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [summaryData, setSummaryData] = useState({
+    total_casos: '0',
+    media_risco: '0',
+    porcentagem_alerta_4: '0',
+  });
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const [timeseriesData, setTimeseriesData] = useState<{
+    labels: string[];
+    datasets: {
+      label: string;
+      data: string[];
+      borderColor: string;
+      backgroundColor: string;
+      fill: boolean;
+    }[];
+  }>({
+    labels: [],
+    datasets: [
+      {
+        label: "Casos de Dengue por Semana",
+        data: [],
+        borderColor: "red",
+        backgroundColor: "red",
+        fill: false,
+      },
+    ],
+  });
+
+  const timeseriesOptions = {
+    responsive: true,
+    normalized: true,
+    plugins: {
+      tooltip: {
+        enabled: false,
+      },
+    },
+    maintainAspectRatio: false,
+    scale: {
+      y: {
+        min: 0,
+      },
+    },
+  };
+
+  useEffect(() => {
+    async function fetchData() {
+      setIsLoading(true);
+  
+      await getGraphData(activeLocation).then(setTimeseriesData);
+      await getSummaryData(activeLocation).then(setSummaryData);
+  
+      setIsLoading(false);
+    }
+  
+    fetchData();
+  }, [activeLocation])
+
+  useEffect(() => {
+    async function fetchVersion () {
+      await getVersion().then(setLastUpdated)
+    }
+    fetchVersion()
+  }, [])
+
+  return (
+    <div id='App' className="">
+      <h1 className="text-center my-4 text-titlecolor font-bold text-3xl">
+        Monitor da Dengue 🦟
+      </h1>
+      <div id="dashboard-container" className="m-auto grid grid-rows-gridLayout gap-3 w-container_width h-container_height text-center rounded-md">
+        <div id="dashboard-menu" className="flex justify-between py-4 bg-white items-center">
+          <LocationSelect activeLocation={activeLocation} setActiveLocation={setActiveLocation} />
+          <span id="update-date" className="mr-4">
+            Última atualização: {lastUpdated}
+            <br/>
+            <span className="text-[8px]">(Este é um site de teste. Consulte fontes oficiais para informações precisas.)</span>
+          </span>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        {isLoading ? 
+        (<div className="flex justify-center items-center h-64 flex-col bg-white">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-red-500"/>
+          <span className="mt-10">Carregando Informações...</span>
+          <br/>
+          <span>(Algumas solicitações podem demorar mais tempo)</span>
+        </div>)
+        :
+        (<>
+          <div id="dashboard-timeseries" className="bg-white text-black">
+            <Line id="line-chart"
+              data={timeseriesData}
+              options={timeseriesOptions}
+              className="h-4/5 m-6"
+            />
+          </div>
+          <div id="dashboard-summary" className="flex flex-row justify-evenly bg-white">
+            <Card keyColor={1} title="Total de Casos" value={summaryData.total_casos}/>
+            <Card keyColor={2} title="Grau de Risco" value={summaryData.media_risco}/>
+            <Card keyColor={3} title="% de Cidades em Epidemia" value={`${summaryData.porcentagem_alerta_4}%`}/>
+          </div>
+        </>)
+        }
+      </div>
     </div>
   );
 }
